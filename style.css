@@ -79,7 +79,8 @@ button:disabled { cursor: not-allowed; }
 .bet-preview { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 11px; padding: 10px 12px; border: 1px solid rgba(116, 88, 238, .34); border-radius: 10px; background: rgba(41, 28, 103, .27); }
 .bet-preview span { color: #9eace0; font-size: 11px; font-weight: 700; }
 .bet-preview strong { color: #f4f6ff; font-size: 14px; }
-.bet-panel > .field-label:nth-of-type(2) { margin-top: 26px; }
+.auto-stop-field { margin-top: 26px; }
+.auto-stop-field[hidden] { display: none; }
 .protection-option { display: flex; align-items: center; gap: 10px; margin-top: 18px; padding: 11px; border: 1px solid rgba(110, 132, 239, .33); border-radius: 12px; color: #dce5ff; background: rgba(35, 35, 107, .28); cursor: pointer; transition: .2s ease; }
 .protection-option:hover, .protection-option:has(input:checked) { border-color: rgba(159, 103, 255, .8); background: rgba(72, 44, 161, .4); }
 .protection-option input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
