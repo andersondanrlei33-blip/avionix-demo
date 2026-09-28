@@ -329,6 +329,11 @@ function animate() {
 
 function startRound() {
   if (running) return;
+  if (!isAuthenticated) {
+    showToast('Cadastre-se e entre na sua conta para apostar.');
+    openModal('login');
+    return;
+  }
   const bet = parseMoney(betInput.value);
   const autoStop = parseMultiplier(autoStopInput.value);
   if (bet <= 0) return showToast('Informe um valor de créditos para a rodada.');
@@ -410,6 +415,7 @@ const registerFields = $('#registerFields');
 const pixKeyType = $('#pixKeyType');
 const pixKey = $('#pixKey');
 let authMode = 'login';
+let isAuthenticated = false;
 const pixKeyPlaceholders = {
   email: 'voce@exemplo.com',
   cpf: '000.000.000-00',
@@ -507,15 +513,17 @@ $('#authForm').addEventListener('submit', (e) => {
     localStorage.setItem(BALANCE_KEY, String(balance));
     userBets = [];
     localStorage.removeItem(BET_HISTORY_KEY);
+    isAuthenticated = false;
     updateBalance();
     renderBets();
-    showToast('Conta demo criada neste navegador.');
+    showToast('Conta criada. Entre para começar a apostar.');
     $('#authForm').reset();
     setAuthMode('login');
     return;
   }
 
   if (saved && saved.email === emailValue && saved.password === passwordValue) {
+    isAuthenticated = true;
     showToast('Login demo realizado com sucesso.');
     closeModal();
   } else {
