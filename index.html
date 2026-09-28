@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#030817" />
+  <title>Avionix Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="stars" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Avionix início">
+      <span class="brand-icon">🚀</span>
+      <span class="brand-name">AVION<span>IX</span></span>
+    </a>
+
+    <nav class="main-nav" aria-label="Navegação principal">
+      <a class="nav-link active" href="#jogo"><span>⌂</span> Início</a>
+      <a class="nav-link" href="#jogo"><span>◷</span> Jogo</a>
+      <a class="nav-link" href="#ranking"><span>♟</span> Ranking</a>
+      <a class="nav-link" href="#afiliados"><span>♧</span> Afiliados</a>
+      <a class="nav-link" href="#suporte"><span>?</span> Suporte</a>
+    </nav>
+
+    <div class="top-actions">
+      <div class="balance-pill"><span class="coin">S</span><strong id="balance">R$ 11.000,00</strong><span class="chevron">⌄</span></div>
+      <button class="btn deposit" id="depositBtn" type="button">Depositar</button>
+      <button class="profile-button" type="button" aria-label="Abrir perfil">
+        <span class="avatar">●</span>
+        <span class="profile-copy"><strong>Usuário</strong><small>Nível 12</small></span>
+        <span class="chevron">⌄</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="app-shell" id="jogo">
+    <section class="dashboard-grid">
+      <aside class="bet-panel panel" aria-label="Painel de apostas">
+        <div class="mode-tabs" role="tablist" aria-label="Modo de aposta">
+          <button class="mode-tab active" type="button" data-mode="manual">Manual</button>
+          <button class="mode-tab" type="button" data-mode="automatic">Automático</button>
+        </div>
+
+        <label class="field-label" for="betAmount">Valor da Aposta</label>
+        <div class="money-control">
+          <input id="betAmount" inputmode="decimal" value="10,00" aria-label="Valor da aposta" />
+          <div class="step-buttons">
+            <button type="button" class="step-button" data-step="-10" aria-label="Diminuir aposta">−</button>
+            <button type="button" class="step-button" data-step="10" aria-label="Aumentar aposta">+</button>
+          </div>
+        </div>
+
+        <div class="quick-values" aria-label="Valores rápidos">
+          <button type="button" data-value="10">R$ 10</button>
+          <button type="button" data-value="25">R$ 25</button>
+          <button type="button" data-value="50">R$ 50</button>
+          <button type="button" data-value="100">R$ 100</button>
+          <button type="button" data-value="250">R$ 250</button>
+          <button type="button" data-value="500">R$ 500</button>
+        </div>
+
+        <div class="bet-preview" aria-live="polite"><span>Sua aposta</span><strong id="betPreview">R$ 10,00</strong></div>
+
+        <label class="field-label" for="autoStop">Auto Retirar</label>
+        <div class="money-control multiplier-control">
+          <input id="autoStop" inputmode="decimal" value="2,00" aria-label="Multiplicador de retirada automática" />
+          <span class="control-suffix">x</span>
+          <div class="step-buttons">
+            <button type="button" class="step-button" data-auto-step="-0.1" aria-label="Diminuir multiplicador">−</button>
+            <button type="button" class="step-button" data-auto-step="0.1" aria-label="Aumentar multiplicador">+</button>
+          </div>
+        </div>
+
+        <label class="protection-option" for="lossProtection">
+          <input id="lossProtection" type="checkbox" />
+          <span class="protection-check" aria-hidden="true">✓</span>
+          <span class="protection-copy">
+            <strong>Proteção de perda · 50%</strong>
+            <small>Se a rodada cair, você recupera metade da aposta.</small>
+          </span>
+        </label>
+
+        <button id="startBtn" class="btn action" type="button">🚀 &nbsp; APOSTAR</button>
+        <p class="panel-note">Créditos virtuais da demonstração. Sem depósitos ou dinheiro real.</p>
+      </aside>
+
+      <section class="game-panel panel" aria-label="Jogo Avionix">
+        <div class="history-heading"><span>Últimos multiplicadores</span><span class="live-label"><i></i> AO VIVO</span></div>
+        <div class="history" aria-label="Histórico de multiplicadores"><div class="history-track" id="history" aria-live="polite"></div></div>
+
+        <div class="game-stage" id="stage">
+          <div class="stage-shade"></div>
+          <div class="grid-lines" aria-hidden="true"></div>
+          <div class="flight-path" id="flightPath" aria-hidden="true"></div>
+          <img class="plane" id="plane" src="avionix-plane.png" alt="" aria-hidden="true" />
+          <div class="multiplier-wrap">
+            <div id="statusLabel" class="status-label">PRONTO PARA DECOLAR</div>
+            <div id="multiplier" class="multiplier">1,00x</div>
+          </div>
+          <div class="stage-badge">DEMO · SEM DINHEIRO REAL</div>
+          <div class="timeline" aria-hidden="true"><span>0s</span><span>5s</span><span>10s</span><span>15s</span><span>20s</span></div>
+        </div>
+
+        <div class="game-footer">
+          <div class="metric-card">
+            <span class="metric-icon">♟</span>
+            <span><small>Jogadores</small><strong>324</strong></span>
+          </div>
+          <button id="cashoutBtn" class="btn cashout" type="button" disabled><span class="stop-square">■</span> PARAR <span id="cashoutValue" class="sr-only">R$ 0,00</span></button>
+          <div class="metric-card">
+            <span class="metric-icon">♛</span>
+            <span><small>Saldo disponível</small><strong id="balanceCard">R$ 11.000,00</strong></span>
+          </div>
+        </div>
+        <div class="round-stats">
+          <span>Sua aposta <strong id="currentBet">R$ 0,00</strong></span>
+          <span>Retorno <strong id="potentialReturn">R$ 0,00</strong></span>
+        </div>
+        <button id="mobileStartBtn" class="btn action mobile-start" type="button">🚀 &nbsp; APOSTAR</button>
+      </section>
+
+      <aside class="bets-panel panel" aria-label="Histórico de apostas">
+        <div class="bets-tabs"><button class="bets-tab active" data-bets-tab="all" type="button">Todas as Apostas</button><button class="bets-tab" data-bets-tab="mine" type="button">Minhas Apostas</button></div>
+        <div class="bets-head"><span>Usuário</span><span>Aposta</span><span>Retirou</span><span>Lucro</span></div>
+        <div class="bets-list" id="betsList" aria-live="polite"></div>
+      </aside>
+    </section>
+
+    <section class="promo-banner" id="afiliados">
+      <div class="promo-copy"><span class="promo-kicker">EXPERIÊNCIA AVIONIX</span><h2>Voe <em>mais alto</em></h2><p>Multiplique seus créditos e teste seus limites no jogo que está conquistando o Brasil!</p></div>
+      <div class="promo-benefits"><div><span>♢</span><strong>Jogo Justo</strong><small>Provably Fair</small></div><div><span>ϟ</span><strong>Saques Rápidos</strong><small>em Minutos</small></div><div><span>♙</span><strong>100% Seguro</strong><small>Seus dados protegidos</small></div></div>
+    </section>
+
+    <section class="stats-grid" id="ranking">
+      <article class="stat-card"><span class="stat-icon">♟</span><div><strong>+150.000</strong><span>Jogadores Ativos</span></div></article>
+      <article class="stat-card"><span class="stat-icon">🚀</span><div><strong>+2.5M</strong><span>Apostas Realizadas</span></div></article>
+      <article class="stat-card"><span class="stat-icon">♛</span><div><strong>12,45x</strong><span>Maior Multiplicador</span></div></article>
+      <article class="stat-card" id="suporte"><span class="stat-icon">◷</span><div><strong>24/7</strong><span>Suporte Online</span></div></article>
+    </section>
+  </main>
+
+  <footer><span>Avionix Demo</span><span>Projeto educacional · sem transações reais</span></footer>
+
+  <div class="modal-backdrop" id="modalBackdrop" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="modal-close" id="modalClose" aria-label="Fechar">×</button>
+      <div class="modal-logo">🚀</div>
+      <h2 id="modalTitle">Entrar</h2>
+      <p id="modalSubtitle">Acesse sua conta demonstrativa.</p>
+      <div class="auth-tabs"><button class="auth-tab active" data-tab="login" type="button">Entrar</button><button class="auth-tab" data-tab="register" type="button">Cadastrar</button></div>
+      <form id="authForm">
+        <label>E-mail<input id="email" type="email" autocomplete="email" placeholder="voce@exemplo.com" required /></label>
+        <label>Senha<input id="password" type="password" autocomplete="current-password" placeholder="••••••••" minlength="6" required /></label>
+        <div class="register-fields" id="registerFields" hidden>
+          <label for="pixKeyType">Tipo de chave PIX<select id="pixKeyType" autocomplete="off"><option value="email">E-mail</option><option value="cpf">CPF</option><option value="phone">Telefone</option><option value="evp">Chave aleatória</option></select></label>
+          <label for="pixKey">Chave PIX para receber saques<input id="pixKey" autocomplete="off" placeholder="Digite sua chave PIX" /></label>
+          <p class="field-help">O CPF/CNPJ não é exigido no cadastro. Essa chave ficará salva no perfil como destino dos saques.</p>
+        </div>
+        <button class="btn primary full" type="submit" id="authSubmit">Entrar</button>
+      </form>
+      <p class="modal-note">Cadastro local de demonstração — nenhum dado é enviado a um servidor.</p>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="script.js"></script>
+</body>
+</html>
