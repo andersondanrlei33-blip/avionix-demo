@@ -66,13 +66,15 @@
 
         <div class="bet-preview" aria-live="polite"><span>Sua aposta</span><strong id="betPreview">R$ 10,00</strong></div>
 
-        <label class="field-label" for="autoStop">Auto Retirar</label>
-        <div class="money-control multiplier-control">
-          <input id="autoStop" inputmode="decimal" value="2,00" aria-label="Multiplicador de retirada automática" />
-          <span class="control-suffix">x</span>
-          <div class="step-buttons">
-            <button type="button" class="step-button" data-auto-step="-0.1" aria-label="Diminuir multiplicador">−</button>
-            <button type="button" class="step-button" data-auto-step="0.1" aria-label="Aumentar multiplicador">+</button>
+        <div class="auto-stop-field" id="autoStopField" hidden>
+          <label class="field-label" for="autoStop">Auto Retirar</label>
+          <div class="money-control multiplier-control">
+            <input id="autoStop" inputmode="decimal" value="2,00" aria-label="Multiplicador de retirada automática" />
+            <span class="control-suffix">x</span>
+            <div class="step-buttons">
+              <button type="button" class="step-button" data-auto-step="-0.1" aria-label="Diminuir multiplicador">−</button>
+              <button type="button" class="step-button" data-auto-step="0.1" aria-label="Aumentar multiplicador">+</button>
+            </div>
           </div>
         </div>
 
