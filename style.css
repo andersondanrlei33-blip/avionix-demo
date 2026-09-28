@@ -150,6 +150,37 @@ button:disabled { cursor: not-allowed; }
 .negative { color: #ff4567 !important; }
 .bets-empty { margin: 21px 4px; color: #9aa9d4; font-size: 11px; line-height: 1.5; text-align: center; }
 
+.rtp-panel { margin-top: 16px; padding: 24px; }
+.rtp-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+.rtp-kicker { color: #a98cff; font-size: 11px; font-weight: 800; letter-spacing: .16em; }
+.rtp-heading h2 { margin: 7px 0 5px; color: #f7f8ff; font-size: clamp(24px, 3vw, 32px); letter-spacing: -.04em; }
+.rtp-heading p { max-width: 640px; margin: 0; color: #aebce5; font-size: 14px; line-height: 1.5; }
+.rtp-formula { display: grid; gap: 6px; min-width: 260px; padding: 15px 17px; border: 1px solid rgba(105, 81, 224, .38); border-radius: 13px; background: rgba(39, 25, 103, .25); color: #bfcaff; font-size: 12px; line-height: 1.4; }
+.rtp-formula strong { color: #ebddff; font-size: 13px; }
+.rtp-controls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: 12px; align-items: end; margin-top: 22px; }
+.rtp-field { display: grid; gap: 8px; color: #cdd7fb; font-size: 13px; font-weight: 800; }
+.rtp-field input { width: 100%; min-height: 48px; border: 1px solid rgba(75, 109, 216, .5); border-radius: 11px; outline: 0; padding: 0 13px; color: white; background: rgba(2, 8, 28, .75); font-size: 16px; font-weight: 800; }
+.rtp-field input:focus { border-color: #9b6cff; box-shadow: 0 0 0 3px rgba(126, 68, 255, .16); }
+.rtp-simulate { min-height: 48px; white-space: nowrap; }
+.rtp-live-note { display: flex; align-items: center; gap: 8px; margin-top: 13px; color: #8798ca; font-size: 12px; }
+.rtp-live-note strong { color: #dfd5ff; }
+.rtp-summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 17px; }
+.rtp-metric { min-height: 93px; padding: 14px; border: 1px solid rgba(63, 98, 207, .36); border-radius: 12px; background: rgba(2, 10, 32, .68); }
+.rtp-metric span { display: block; color: #9eadd8; font-size: 12px; line-height: 1.35; }
+.rtp-metric strong { display: block; min-height: 24px; margin-top: 7px; color: #f6f7ff; font-size: 18px; line-height: 1.2; }
+.rtp-metric small { display: block; margin-top: 5px; color: #7183b4; font-size: 11px; }
+.rtp-table-wrap { margin-top: 18px; overflow-x: auto; border: 1px solid rgba(66, 100, 210, .35); border-radius: 13px; background: rgba(2, 8, 27, .58); }
+.rtp-table { width: 100%; min-width: 700px; border-collapse: collapse; font-size: 13px; }
+.rtp-table caption { padding: 14px 15px 10px; color: #8d9dcc; font-size: 12px; text-align: left; }
+.rtp-table th, .rtp-table td { padding: 11px 14px; border-top: 1px solid rgba(65, 96, 193, .2); text-align: right; white-space: nowrap; }
+.rtp-table thead th { color: #8093c7; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+.rtp-table tbody th { color: #dedfff; font-weight: 800; text-align: left; }
+.rtp-table tbody td { color: #bdc9ea; }
+.rtp-table tbody td:nth-child(2) { color: #b98cff; font-weight: 800; }
+.rtp-table tbody td:nth-child(3) { color: #00dfa5; }
+.rtp-disclaimer { margin: 17px 2px 0; padding: 13px 15px; border-left: 3px solid #8252ff; border-radius: 0 9px 9px 0; color: #aebce3; background: rgba(55, 37, 139, .19); font-size: 12px; line-height: 1.55; }
+.rtp-disclaimer strong { color: #f1eaff; }
+
 .promo-banner { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; align-items: center; min-height: 185px; margin-top: 16px; padding: 25px 32px; overflow: hidden; border: 1px solid rgba(62, 98, 205, .44); border-radius: 16px; background: linear-gradient(90deg, rgba(5, 15, 45, .93) 0%, rgba(5, 15, 45, .72) 52%, rgba(3, 9, 26, .56)), url('avionix-flight.png') center/cover no-repeat; box-shadow: var(--shadow); }
 .promo-kicker { color: #a9b8e8; font-size: 11px; font-weight: 800; letter-spacing: .2em; }
 .promo-copy h2 { margin: 8px 0 4px; font-size: clamp(34px, 4vw, 54px); font-style: italic; letter-spacing: -.07em; text-transform: uppercase; }
@@ -209,6 +240,11 @@ footer { display: flex; justify-content: space-between; width: min(1480px, calc(
   .dashboard-grid { grid-template-columns: 280px minmax(0, 1fr); }
   .bets-panel { grid-column: 1 / -1; }
   .bets-list { display: grid; grid-template-columns: repeat(2, 1fr); column-gap: 22px; }
+  .rtp-heading { display: grid; }
+  .rtp-formula { width: fit-content; }
+  .rtp-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rtp-simulate { width: 100%; }
+  .rtp-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .promo-banner { grid-template-columns: 1fr; }
   .promo-benefits { max-width: 500px; }
 }
@@ -237,6 +273,10 @@ footer { display: flex; justify-content: space-between; width: min(1480px, calc(
   .metric-card strong { font-size: 11px; }
   .btn.cashout { min-height: 58px; font-size: 14px; }
   .bets-list { display: block; }
+  .rtp-panel { padding: 18px 14px; }
+  .rtp-controls, .rtp-summary-grid { grid-template-columns: 1fr; }
+  .rtp-formula { min-width: 0; width: 100%; }
+  .rtp-metric strong { font-size: 17px; }
   .promo-banner { padding: 22px 18px; }
   .promo-benefits { gap: 6px; }
   .promo-benefits strong { font-size: 11px; }
