@@ -153,9 +153,9 @@
       <h2 id="modalTitle">Entrar</h2>
       <p id="modalSubtitle">Acesse sua conta demonstrativa.</p>
       <div class="auth-tabs"><button class="auth-tab active" data-tab="login" type="button">Entrar</button><button class="auth-tab" data-tab="register" type="button">Cadastrar</button></div>
-      <form id="authForm">
-        <label>E-mail<input id="email" type="email" autocomplete="email" placeholder="voce@exemplo.com" required /></label>
-        <label>Senha<input id="password" type="password" autocomplete="current-password" placeholder="••••••••" minlength="6" required /></label>
+      <form id="authForm" autocomplete="off">
+        <label>E-mail<input id="email" name="avionix-email" type="email" autocomplete="off" autocapitalize="none" spellcheck="false" readonly placeholder="voce@exemplo.com" required /></label>
+        <label>Senha<input id="password" name="avionix-password" type="password" autocomplete="new-password" readonly placeholder="••••••••" minlength="6" required /></label>
         <div class="register-fields" id="registerFields" hidden>
           <label for="pixKeyType">Tipo de chave PIX<select id="pixKeyType" autocomplete="off"><option value="email">E-mail</option><option value="cpf">CPF</option><option value="phone">Telefone</option><option value="evp">Chave aleatória</option></select></label>
           <label for="pixKey">Chave PIX para receber saques<input id="pixKey" autocomplete="off" placeholder="Digite sua chave PIX" /></label>
