@@ -444,7 +444,15 @@ function setAuthMode(mode) {
 function openModal(mode) {
   setAuthMode(mode);
   modalBackdrop.hidden = false;
-  setTimeout(() => email.focus(), 20);
+  email.value = '';
+  password.value = '';
+  email.setAttribute('readonly', 'readonly');
+  password.setAttribute('readonly', 'readonly');
+  setTimeout(() => {
+    email.removeAttribute('readonly');
+    password.removeAttribute('readonly');
+    email.focus();
+  }, 80);
 }
 
 function closeModal() {
@@ -468,9 +476,8 @@ function hasLocalAccount() {
   }
 }
 
-if (!hasLocalAccount()) {
-  setTimeout(() => openModal('register'), 350);
-}
+// Sempre inicia pelo cadastro para impedir que uma conta antiga seja reutilizada.
+setTimeout(() => openModal('register'), 350);
 
 $('#authForm').addEventListener('submit', (e) => {
   e.preventDefault();
