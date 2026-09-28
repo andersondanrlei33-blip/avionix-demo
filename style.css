@@ -49,6 +49,7 @@ button:disabled { cursor: not-allowed; }
 .chevron { color: #a9b8e9; font-size: 19px; line-height: 1; }
 .btn { border: 0; border-radius: 12px; padding: 13px 19px; color: white; font-weight: 800; transition: .2s ease; }
 .btn:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.07); }
+.btn.primary { color: white; background: linear-gradient(135deg, #356dff, #3155e8 58%, #2179ff); box-shadow: 0 14px 28px rgba(43, 94, 255, .32); }
 .btn.deposit { min-height: 48px; padding-inline: 30px; background: linear-gradient(135deg, #8a3dff, #5039ff 58%, #2d6dff); box-shadow: 0 12px 28px rgba(86, 49, 255, .35); }
 .profile-button { display: inline-flex; align-items: center; gap: 10px; padding: 0 4px; border: 0; color: white; background: transparent; text-align: left; }
 .avatar { width: 48px; height: 48px; display: grid; place-items: center; border: 1px solid #6276d9; border-radius: 50%; color: #b7c5ff; background: radial-gradient(circle at 50% 30%, #9aaaff 0 12%, transparent 13%), radial-gradient(ellipse at 50% 100%, #8297ff 0 31%, transparent 32%), rgba(12, 24, 68, .9); font-size: 0; }
@@ -247,3 +248,4 @@ footer { display: flex; justify-content: space-between; width: min(1480px, calc(
   footer { width: calc(100% - 20px); flex-direction: column; gap: 7px; }
   .modal { max-height: calc(100dvh - 20px); padding: 30px 20px 24px; border-radius: 21px; }
 }
+
