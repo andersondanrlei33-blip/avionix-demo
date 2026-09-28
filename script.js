@@ -30,6 +30,7 @@ function setActionButtons(disabled, label) {
 }
 
 const BET_HISTORY_KEY = 'avionix-demo-bet-history-v1';
+const AUTH_USER_KEY = 'avionix-demo-user-v2';
 const publicBets = [
   { user: 'Joao***', amount: 50, multiplier: 2.35, profit: 67.5, won: true, dot: 'dot-yellow' },
   { user: 'Ana***', amount: 25, multiplier: 0, profit: -25, won: false, dot: 'dot-pink' },
@@ -456,9 +457,24 @@ pixKeyType.addEventListener('change', updatePixKeyPlaceholder);
 $('#modalClose').addEventListener('click', closeModal);
 modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) closeModal(); });
 
+// Cada navegador precisa criar sua própria conta demo antes de entrar.
+// A versão v2 invalida qualquer usuário demo salvo pela versão anterior.
+function hasLocalAccount() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(AUTH_USER_KEY) || 'null');
+    return Boolean(saved?.email && saved?.password);
+  } catch {
+    return false;
+  }
+}
+
+if (!hasLocalAccount()) {
+  setTimeout(() => openModal('register'), 350);
+}
+
 $('#authForm').addEventListener('submit', (e) => {
   e.preventDefault();
-  const key = 'avionix-demo-user';
+  const key = AUTH_USER_KEY;
   const saved = JSON.parse(localStorage.getItem(key) || 'null');
   const emailValue = email.value.trim().toLowerCase();
   const passwordValue = password.value;
@@ -497,3 +513,4 @@ renderBets();
 syncBetPreview();
 updateBalance();
 resetStage();
+
