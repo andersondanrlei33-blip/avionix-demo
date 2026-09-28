@@ -424,8 +424,18 @@ const pixKeyPlaceholders = {
   evp: 'Digite sua chave aleatória',
 };
 
-function updatePixKeyPlaceholder() {
+function formatCpf(value) {
+  const digits = String(value).replace(/\D/g, '').slice(0, 11);
+  return digits
+    .replace(/^(\d{3})(\d)/, '$1.$2')
+    .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3-$4');
+}
+
+function updatePixKeyField() {
   pixKey.placeholder = pixKeyPlaceholders[pixKeyType.value] || 'Digite sua chave PIX';
+  pixKey.inputMode = pixKeyType.value === 'cpf' ? 'numeric' : 'text';
+  if (pixKeyType.value === 'cpf') pixKey.value = formatCpf(pixKey.value);
 }
 
 function setAuthMode(mode) {
@@ -438,7 +448,7 @@ function setAuthMode(mode) {
   registerFields.hidden = !register;
   pixKeyType.required = register;
   pixKey.required = register;
-  if (register) updatePixKeyPlaceholder();
+  if (register) updatePixKeyField();
 }
 
 function openModal(mode) {
@@ -461,7 +471,10 @@ function closeModal() {
 
 $$('[data-open]').forEach(btn => btn.addEventListener('click', () => openModal(btn.dataset.open)));
 $$('.auth-tab').forEach(tab => tab.addEventListener('click', () => setAuthMode(tab.dataset.tab)));
-pixKeyType.addEventListener('change', updatePixKeyPlaceholder);
+pixKeyType.addEventListener('change', updatePixKeyField);
+pixKey.addEventListener('input', () => {
+  if (pixKeyType.value === 'cpf') pixKey.value = formatCpf(pixKey.value);
+});
 $('#modalClose').addEventListener('click', closeModal);
 modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) closeModal(); });
 
@@ -488,6 +501,9 @@ $('#authForm').addEventListener('submit', (e) => {
 
   if (authMode === 'register') {
     if (saved?.email === emailValue) return showToast('Já existe uma conta demo com este e-mail.');
+    if (pixKeyType.value === 'cpf' && pixKey.value.replace(/\D/g, '').length !== 11) {
+      return showToast('Informe o CPF completo no formato 000.000.000-00.');
+    }
     localStorage.setItem(key, JSON.stringify({
       email: emailValue,
       password: passwordValue,
