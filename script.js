@@ -56,17 +56,10 @@ try {
   userBets = [];
 }
 
-const STARTING_BALANCE = 11000;
-const DEMO_BONUS_AMOUNT = 10000;
-const DEMO_BONUS_KEY = 'avionix-demo-bonus-10000-v1';
-const savedBalance = localStorage.getItem('avionix-demo-balance');
+const STARTING_BALANCE = 500;
+const BALANCE_KEY = 'avionix-demo-balance-v3';
+const savedBalance = localStorage.getItem(BALANCE_KEY);
 let balance = savedBalance === null ? STARTING_BALANCE : Number(savedBalance);
-
-// Apply the new demo credit once to browsers that already had a saved balance.
-if (localStorage.getItem(DEMO_BONUS_KEY) !== 'true') {
-  if (savedBalance !== null) balance += DEMO_BONUS_AMOUNT;
-  localStorage.setItem(DEMO_BONUS_KEY, 'true');
-}
 let running = false;
 let currentBet = 0;
 let roundProtection = false;
@@ -172,7 +165,7 @@ function syncBetPreview() {
 function updateBalance() {
   balanceEl.textContent = brl(balance);
   if (balanceCardEl) balanceCardEl.textContent = brl(balance);
-  localStorage.setItem('avionix-demo-balance', String(balance));
+  localStorage.setItem(BALANCE_KEY, String(balance));
 }
 
 function showToast(message) {
@@ -510,6 +503,12 @@ $('#authForm').addEventListener('submit', (e) => {
       pixKeyType: pixKeyType.value,
       pixKey: pixKey.value.trim(),
     }));
+    balance = STARTING_BALANCE;
+    localStorage.setItem(BALANCE_KEY, String(balance));
+    userBets = [];
+    localStorage.removeItem(BET_HISTORY_KEY);
+    updateBalance();
+    renderBets();
     showToast('Conta demo criada neste navegador.');
     $('#authForm').reset();
     setAuthMode('login');
