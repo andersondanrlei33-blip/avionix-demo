@@ -22,6 +22,7 @@
     <nav class="main-nav" aria-label="Navegação principal">
       <a class="nav-link active" href="#jogo"><span>⌂</span> Início</a>
       <a class="nav-link" href="#jogo"><span>◷</span> Jogo</a>
+      <a class="nav-link" href="#rtpSimulator"><span>∑</span> RTP</a>
       <a class="nav-link" href="#ranking"><span>♟</span> Ranking</a>
       <a class="nav-link" href="#afiliados"><span>♧</span> Afiliados</a>
       <a class="nav-link" href="#suporte"><span>?</span> Suporte</a>
@@ -131,6 +132,52 @@
         <div class="bets-head"><span>Usuário</span><span>Aposta</span><span>Retirou</span><span>Lucro</span></div>
         <div class="bets-list" id="betsList" aria-live="polite"></div>
       </aside>
+    </section>
+
+    <section class="rtp-panel panel" id="rtpSimulator" aria-labelledby="rtpTitle">
+      <div class="rtp-heading">
+        <div>
+          <span class="rtp-kicker">ANÁLISE ESTATÍSTICA</span>
+          <h2 id="rtpTitle">Simulador de RTP</h2>
+          <p>Veja como a vantagem matemática da casa aparece em um bloco de apostas independentes.</p>
+        </div>
+        <div class="rtp-formula"><strong>P(acerto) = RTP ÷ multiplicador</strong><span>Prêmio bruto = aposta × multiplicador</span></div>
+      </div>
+
+      <div class="rtp-controls" aria-label="Parâmetros do simulador">
+        <label class="rtp-field" for="rtpInput">RTP (%)<input id="rtpInput" type="number" inputmode="decimal" min="0" max="100" step="0.1" value="80" /></label>
+        <label class="rtp-field" for="rtpBetCount">Apostas no bloco<input id="rtpBetCount" type="number" inputmode="numeric" min="1" step="1" value="1000" /></label>
+        <label class="rtp-field" for="rtpStake">Valor por aposta<input id="rtpStake" inputmode="decimal" value="10,00" /></label>
+        <button class="btn primary rtp-simulate" id="rtpSimulateBtn" type="button">Simular bloco</button>
+      </div>
+      <div class="rtp-live-note">RTP atual: <strong id="rtpValuePreview">80,00%</strong><span>·</span> Vantagem da casa: <strong id="houseEdgeValue">20,00%</strong></div>
+
+      <div class="rtp-summary-grid" aria-live="polite">
+        <article class="rtp-metric"><span>Total apostado</span><strong id="rtpTotalBet">R$ 10.000,00</strong><small>volume do bloco</small></article>
+        <article class="rtp-metric"><span>Total devolvido</span><strong id="rtpTotalPaid">R$ 0,00</strong><small>prêmios observados</small></article>
+        <article class="rtp-metric"><span>Resultado da casa</span><strong id="rtpHouseResult">R$ 0,00</strong><small>apostado − pago</small></article>
+        <article class="rtp-metric"><span>Prêmios esperados</span><strong id="rtpExpectedPaid">R$ 8.000,00</strong><small>RTP aplicado ao bloco</small></article>
+        <article class="rtp-metric"><span>Acertos observados / esperados</span><strong><span id="rtpObservedHits">0</span> / <span id="rtpExpectedHits">0</span></strong><small>eventos independentes</small></article>
+        <article class="rtp-metric"><span>Desvio padrão</span><strong id="rtpStdDev">R$ 0,00</strong><small>do resultado da casa</small></article>
+        <article class="rtp-metric"><span>Faixa provável P5–P95</span><strong id="rtpRange">R$ 0,00 – R$ 0,00</strong><small>aproximação normal</small></article>
+        <article class="rtp-metric"><span>Chance de prejuízo</span><strong id="rtpLossChance">0,00%</strong><small>estimada para o bloco</small></article>
+      </div>
+
+      <div class="rtp-table-wrap">
+        <table class="rtp-table">
+          <caption>Probabilidades e acertos por multiplicador. O bloco é distribuído de forma equilibrada entre as faixas.</caption>
+          <thead><tr><th scope="col">Multiplicador</th><th scope="col">P(acerto)</th><th scope="col">Prêmio bruto</th><th scope="col">Apostas</th><th scope="col">Acertos obs.</th><th scope="col">Acertos esp.</th></tr></thead>
+          <tbody id="rtpRows">
+            <tr data-rtp-row data-multiplier="1.01"><th scope="row">1,01x</th><td data-rtp-prob>79,21%</td><td data-rtp-payout>R$ 10,10</td><td data-rtp-bets>167</td><td data-rtp-observed>—</td><td data-rtp-expected>—</td></tr>
+            <tr data-rtp-row data-multiplier="1.5"><th scope="row">1,50x</th><td data-rtp-prob>53,33%</td><td data-rtp-payout>R$ 15,00</td><td data-rtp-bets>167</td><td data-rtp-observed>—</td><td data-rtp-expected>—</td></tr>
+            <tr data-rtp-row data-multiplier="2"><th scope="row">2,00x</th><td data-rtp-prob>40,00%</td><td data-rtp-payout>R$ 20,00</td><td data-rtp-bets>167</td><td data-rtp-observed>—</td><td data-rtp-expected>—</td></tr>
+            <tr data-rtp-row data-multiplier="3"><th scope="row">3,00x</th><td data-rtp-prob>26,67%</td><td data-rtp-payout>R$ 30,00</td><td data-rtp-bets>167</td><td data-rtp-observed>—</td><td data-rtp-expected>—</td></tr>
+            <tr data-rtp-row data-multiplier="5"><th scope="row">5,00x</th><td data-rtp-prob>16,00%</td><td data-rtp-payout>R$ 50,00</td><td data-rtp-bets>166</td><td data-rtp-observed>—</td><td data-rtp-expected>—</td></tr>
+            <tr data-rtp-row data-multiplier="10"><th scope="row">10,00x</th><td data-rtp-prob>8,00%</td><td data-rtp-payout>R$ 100,00</td><td data-rtp-bets>166</td><td data-rtp-observed>—</td><td data-rtp-expected>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="rtp-disclaimer"><strong>Importante:</strong> RTP de 80% é uma expectativa estatística de longo prazo, não uma garantia de lucro em cada bloco. Cada aposta é independente; o simulador não usa o histórico para decidir a próxima rodada nem escolhe quem ganha.</p>
     </section>
 
     <section class="promo-banner" id="afiliados">
