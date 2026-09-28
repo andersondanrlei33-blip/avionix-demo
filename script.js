@@ -5,6 +5,7 @@ const balanceEl = $('#balance');
 const balanceCardEl = $('#balanceCard');
 const betInput = $('#betAmount');
 const autoStopInput = $('#autoStop');
+const autoStopField = $('#autoStopField');
 const lossProtectionInput = $('#lossProtection');
 const startBtn = $('#startBtn');
 const mobileStartBtn = $('#mobileStartBtn');
@@ -81,6 +82,12 @@ function parseMoney(value) {
 
 function parseMultiplier(value) {
   return Number(String(value).replace(',', '.')) || 0;
+}
+
+function updateModeVisibility() {
+  const automatic = gameMode === 'automatic';
+  autoStopField.hidden = !automatic;
+  autoStopInput.disabled = !automatic;
 }
 
 function multiplierLabel(value) {
@@ -387,6 +394,7 @@ $$('.mode-tab').forEach(tab => {
   tab.addEventListener('click', () => {
     gameMode = tab.dataset.mode;
     $$('.mode-tab').forEach(item => item.classList.toggle('active', item === tab));
+    updateModeVisibility();
     showToast(gameMode === 'automatic' ? 'Modo automático selecionado.' : 'Modo manual selecionado.');
   });
 });
@@ -542,5 +550,6 @@ setInterval(() => {
 renderBets();
 syncBetPreview();
 updateBalance();
+updateModeVisibility();
 resetStage();
 
