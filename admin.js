@@ -4,6 +4,7 @@ const $$ = (selector) => [...document.querySelectorAll(selector)];
 const LIVE_RTP_KEY = 'avionix-demo-live-rtp-v1';
 const RTP_MULTIPLIERS = [1.01, 1.5, 2, 3, 5, 10];
 const rtpInput = $('#adminRtpInput');
+const refreshRtpBtn = $('#refreshRtpBtn');
 const rtpRows = $$('[data-rtp-row]');
 let liveRtpBets = [];
 
@@ -126,15 +127,21 @@ function renderLiveMonitor() {
   });
 }
 
-rtpInput.addEventListener('input', renderLiveMonitor);
-window.addEventListener('storage', (event) => {
-  if (event.key !== LIVE_RTP_KEY) return;
+function refreshPanel() {
   readLiveBets();
   renderLiveMonitor();
+  const now = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  $('#adminLastUpdated').textContent = `Última atualização: ${now}`;
+}
+
+rtpInput.addEventListener('input', renderLiveMonitor);
+refreshRtpBtn.addEventListener('click', refreshPanel);
+window.addEventListener('storage', (event) => {
+  if (event.key !== LIVE_RTP_KEY) return;
+  refreshPanel();
 });
 
-readLiveBets();
-renderLiveMonitor();
+refreshPanel();
 setInterval(() => {
   readLiveBets();
   renderLiveMonitor();
