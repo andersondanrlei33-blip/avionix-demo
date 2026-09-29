@@ -4,8 +4,6 @@ const $$ = (s) => [...document.querySelectorAll(s)];
 const balanceEl = $('#balance');
 const balanceCardEl = $('#balanceCard');
 const betInput = $('#betAmount');
-const autoStopInput = $('#autoStop');
-const autoStopField = $('#autoStopField');
 const lossProtectionInput = $('#lossProtection');
 const protectionUsesEl = $('#protectionUses');
 const startBtn = $('#startBtn');
@@ -102,7 +100,6 @@ let balance = savedBalance === null ? STARTING_BALANCE : Number(savedBalance);
 let running = false;
 let currentBet = 0;
 let roundProtection = false;
-let gameMode = 'manual';
 let multiplier = 1;
 let crashAt = 0;
 let animationTimer = null;
@@ -117,16 +114,6 @@ function parseMoney(value) {
   const cleaned = String(value).replace(/\s/g, '').replace(/R\$/gi, '');
   if (cleaned.includes(',')) return Number(cleaned.replace(/\./g, '').replace(',', '.')) || 0;
   return Number(cleaned) || 0;
-}
-
-function parseMultiplier(value) {
-  return Number(String(value).replace(',', '.')) || 0;
-}
-
-function updateModeVisibility() {
-  const automatic = gameMode === 'automatic';
-  autoStopField.hidden = !automatic;
-  autoStopInput.disabled = !automatic;
 }
 
 function protectionDateKey() {
@@ -442,7 +429,7 @@ function endRound(won = false) {
   }, 2200);
 }
 
-function cashout(auto = false) {
+function cashout() {
   if (!running) return;
   const payout = currentBet * multiplier;
   balance += payout;
@@ -451,7 +438,7 @@ function cashout(auto = false) {
   cancelAnimationFrame(animationTimer);
 
   multiplierEl.className = 'multiplier won';
-  statusLabel.textContent = auto ? 'VOCÊ GANHOU · PARADA AUTOMÁTICA' : 'VOCÊ GANHOU';
+  statusLabel.textContent = 'VOCÊ GANHOU';
   plane.classList.remove('plane-leaving');
   plane.classList.add('plane-won');
   potentialReturnEl.textContent = brl(payout);
@@ -487,16 +474,6 @@ function animate() {
   cashoutValueEl.textContent = brl(currentBet * multiplier);
   setPlaneProgress(multiplier);
 
-  if (gameMode === 'automatic') {
-    const autoStop = parseMultiplier(autoStopInput.value);
-    if (autoStop >= 1.01 && multiplier >= autoStop) {
-      multiplier = autoStop;
-      multiplierEl.textContent = multiplierLabel(multiplier);
-      cashout(true);
-      return;
-    }
-  }
-
   animationTimer = requestAnimationFrame(animate);
 }
 
@@ -509,10 +486,8 @@ function startRound() {
     return;
   }
   const bet = parseMoney(betInput.value);
-  const autoStop = parseMultiplier(autoStopInput.value);
   if (bet <= 0) return showToast('Informe um valor de créditos para a rodada.');
   if (bet > balance) return showToast('Saldo demo insuficiente.');
-  if (gameMode === 'automatic' && autoStop < 1.01) return showToast('A retirada automática deve ser maior que 1,00x.');
 
   const useProtection = lossProtectionInput.checked;
   if (useProtection && !consumeProtectionUse()) {
@@ -555,22 +530,6 @@ $$('[data-step]').forEach(btn => {
     const next = Math.max(1, parseMoney(betInput.value) + Number(btn.dataset.step));
     betInput.value = next.toFixed(2).replace('.', ',');
     syncBetPreview();
-  });
-});
-
-$$('[data-auto-step]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const next = Math.max(1.01, parseMultiplier(autoStopInput.value) + Number(btn.dataset.autoStep));
-    autoStopInput.value = next.toFixed(2).replace('.', ',');
-  });
-});
-
-$$('.mode-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    gameMode = tab.dataset.mode;
-    $$('.mode-tab').forEach(item => item.classList.toggle('active', item === tab));
-    updateModeVisibility();
-    showToast(gameMode === 'automatic' ? 'Modo automático selecionado.' : 'Modo manual selecionado.');
   });
 });
 
@@ -727,7 +686,6 @@ setInterval(() => {
 renderBets();
 syncBetPreview();
 updateBalance();
-updateModeVisibility();
 updateProtectionAvailability();
 resetStage();
 
