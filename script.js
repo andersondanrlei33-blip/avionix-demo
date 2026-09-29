@@ -307,7 +307,7 @@ function setPlaneProgress(value) {
   const pathLength = flightCurve.getTotalLength();
   const point = flightCurve.getPointAtLength(pathLength * progress);
   const nextPoint = flightCurve.getPointAtLength(Math.min(pathLength, pathLength * (progress + .015)));
-  const trailProgress = Math.max(0, progress - .055);
+  const trailProgress = Math.max(0, progress - .025);
   const trailPoint = flightCurve.getPointAtLength(pathLength * trailProgress);
   const angle = Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x) * 180 / Math.PI;
   plane.style.left = `${point.x / 10}%`;
