@@ -2,11 +2,16 @@ const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 
 const LIVE_RTP_KEY = 'avionix-demo-live-rtp-v1';
+const SUPABASE_URL = 'https://cnbongbcemnekoncntji.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_JkSehx3j8c1gwXWNhc20_w_f9obeS6H';
+const SHARED_BETS_ENDPOINT = `${SUPABASE_URL}/rest/v1/demo_bets`;
 const RTP_MULTIPLIERS = [1.01, 1.5, 2, 3, 5, 10];
 const rtpInput = $('#adminRtpInput');
 const refreshRtpBtn = $('#refreshRtpBtn');
 const rtpRows = $$('[data-rtp-row]');
 let liveRtpBets = [];
+let legacyBetsMigrated = false;
+let refreshInFlight = false;
 
 function brl(value) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
@@ -44,12 +49,62 @@ function nearestRtpMultiplierIndex(value) {
   ), 0);
 }
 
-function readLiveBets() {
+function readLocalBets() {
   try {
     const saved = JSON.parse(localStorage.getItem(LIVE_RTP_KEY) || '[]');
-    liveRtpBets = Array.isArray(saved) ? saved : [];
+    return Array.isArray(saved) ? saved : [];
   } catch {
-    liveRtpBets = [];
+    return [];
+  }
+}
+
+function legacyBetPayload(bet) {
+  return {
+    id: String(bet.id || `${Date.now()}-${Math.random().toString(36).slice(2)}`),
+    user_label: 'Usuário demo',
+    amount: Number(bet.amount || 0),
+    multiplier: bet.multiplier === null || bet.multiplier === undefined ? null : Number(bet.multiplier),
+    payout: Number(bet.payout || 0),
+    won: Boolean(bet.won),
+    protected: Boolean(bet.protected),
+    status: bet.status === 'pending' ? 'pending' : 'settled',
+    created_at: new Date(Number(bet.timestamp || Date.now())).toISOString(),
+  };
+}
+
+async function migrateLegacyBets(localBets) {
+  if (legacyBetsMigrated) return;
+  legacyBetsMigrated = true;
+  if (!localBets.length) return;
+
+  const response = await fetch(SHARED_BETS_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_PUBLISHABLE_KEY,
+      Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=merge-duplicates,return=minimal',
+    },
+    body: JSON.stringify(localBets.filter((bet) => Number(bet.amount) > 0).map(legacyBetPayload)),
+  });
+  if (!response.ok) throw new Error(`legacy bet migration failed (${response.status})`);
+}
+
+async function readLiveBets() {
+  const localBets = readLocalBets();
+  try {
+    await migrateLegacyBets(localBets);
+    const response = await fetch(`${SHARED_BETS_ENDPOINT}?select=id,user_label,amount,multiplier,payout,won,protected,status,created_at&order=created_at.desc&limit=1000`, {
+      headers: {
+        apikey: SUPABASE_PUBLISHABLE_KEY,
+        Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+      },
+    });
+    if (!response.ok) throw new Error(`shared bets read failed (${response.status})`);
+    const sharedBets = await response.json();
+    liveRtpBets = Array.isArray(sharedBets) ? sharedBets : localBets;
+  } catch {
+    liveRtpBets = localBets;
   }
 }
 
@@ -127,11 +182,17 @@ function renderLiveMonitor() {
   });
 }
 
-function refreshPanel() {
-  readLiveBets();
-  renderLiveMonitor();
-  const now = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  $('#adminLastUpdated').textContent = `Última atualização: ${now}`;
+async function refreshPanel() {
+  if (refreshInFlight) return;
+  refreshInFlight = true;
+  try {
+    await readLiveBets();
+    renderLiveMonitor();
+    const now = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    $('#adminLastUpdated').textContent = `Última atualização: ${now}`;
+  } finally {
+    refreshInFlight = false;
+  }
 }
 
 rtpInput.addEventListener('input', renderLiveMonitor);
@@ -143,7 +204,6 @@ window.addEventListener('storage', (event) => {
 
 refreshPanel();
 setInterval(() => {
-  readLiveBets();
-  renderLiveMonitor();
-}, 1000);
+  void refreshPanel();
+}, 2500);
 

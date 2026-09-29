@@ -47,7 +47,7 @@ function startRoundCooldown() {
       setActionButtons(false, '🚀  APOSTAR');
       return;
     }
-    setActionButtons(true, 'AGUARDE ' + Math.ceil(remaining / 1000) + 's...');
+    setActionButtons(true, `AGUARDE ${Math.ceil(remaining / 1000)}s...`);
     roundCooldownTimer = setTimeout(updateCooldown, 200);
   };
 
@@ -59,6 +59,9 @@ const LIVE_RTP_KEY = 'avionix-demo-live-rtp-v1';
 const AUTH_USER_KEY = 'avionix-demo-user-v2';
 const PROTECTION_USAGE_KEY = 'avionix-demo-protection-usage-v1';
 const PROTECTION_DAILY_LIMIT = 2;
+const SUPABASE_URL = 'https://cnbongbcemnekoncntji.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_JkSehx3j8c1gwXWNhc20_w_f9obeS6H';
+const SHARED_BETS_ENDPOINT = `${SUPABASE_URL}/rest/v1/demo_bets`;
 const publicBets = [
   { user: 'Joao***', amount: 50, multiplier: 2.35, profit: 67.5, won: true, dot: 'dot-yellow' },
   { user: 'Ana***', amount: 25, multiplier: 0, profit: -25, won: false, dot: 'dot-pink' },
@@ -179,6 +182,49 @@ function signedBrl(value) {
   return value >= 0 ? `+${brl(value)}` : `-${brl(Math.abs(value))}`;
 }
 
+function currentAccount() {
+  try {
+    return JSON.parse(localStorage.getItem(AUTH_USER_KEY) || 'null');
+  } catch {
+    return null;
+  }
+}
+
+function maskEmail(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  const [localPart, domain] = normalized.split('@');
+  if (!localPart || !domain) return 'Usuário demo';
+  return `${localPart.slice(0, Math.min(3, localPart.length))}***@${domain}`;
+}
+
+function sharedBetPayload(bet) {
+  return {
+    id: String(bet.id),
+    user_label: maskEmail(currentAccount()?.email),
+    amount: Number(bet.amount || 0),
+    multiplier: bet.multiplier === null || bet.multiplier === undefined ? null : Number(bet.multiplier),
+    payout: Number(bet.payout || 0),
+    won: Boolean(bet.won),
+    protected: Boolean(bet.protected),
+    status: bet.status === 'pending' ? 'pending' : 'settled',
+    created_at: new Date(Number(bet.timestamp || Date.now())).toISOString(),
+  };
+}
+
+async function syncSharedBet(bet) {
+  const response = await fetch(SHARED_BETS_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_PUBLISHABLE_KEY,
+      Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=merge-duplicates,return=minimal',
+    },
+    body: JSON.stringify(sharedBetPayload(bet)),
+  });
+  if (!response.ok) throw new Error(`shared bet sync failed (${response.status})`);
+}
+
 function userBetRow(bet) {
   const profit = Number(bet.payout || 0) - Number(bet.amount || 0);
   return {
@@ -251,6 +297,7 @@ function recordUserBet(won, resolvedMultiplier, payout) {
   else liveRtpBets.unshift(recordedBet);
   liveRtpBets = liveRtpBets.slice(0, 1000);
   localStorage.setItem(LIVE_RTP_KEY, JSON.stringify(liveRtpBets));
+  void syncSharedBet(recordedBet).catch(() => {});
   currentLiveBetId = null;
   renderBets();
 }
@@ -267,7 +314,7 @@ function updateBalance() {
 
 function beginLiveBet() {
   currentLiveBetId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  liveRtpBets.unshift({
+  const pendingBet = {
     id: currentLiveBetId,
     amount: currentBet,
     multiplier: null,
@@ -275,9 +322,11 @@ function beginLiveBet() {
     won: false,
     timestamp: Date.now(),
     status: 'pending',
-  });
+  };
+  liveRtpBets.unshift(pendingBet);
   liveRtpBets = liveRtpBets.slice(0, 1000);
   localStorage.setItem(LIVE_RTP_KEY, JSON.stringify(liveRtpBets));
+  void syncSharedBet(pendingBet).catch(() => {});
 }
 
 function showToast(message) {
@@ -538,7 +587,7 @@ $$('.bets-tab').forEach(tab => {
   });
 });
 
-// Auth modal: local-only demonstration.
+// A conta demo permanece local; os resultados das rodadas são compartilhados com o painel.
 const modalBackdrop = $('#modalBackdrop');
 const modalTitle = $('#modalTitle');
 const modalSubtitle = $('#modalSubtitle');
