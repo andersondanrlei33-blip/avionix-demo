@@ -39,7 +39,13 @@
 
       <div class="admin-rtp-controls">
         <label class="rtp-field" for="adminRtpInput">RTP de referência (%)<input id="adminRtpInput" type="number" inputmode="decimal" min="0" max="100" step="0.1" value="80" /></label>
-        <div class="admin-readonly">● Monitoramento ao vivo · sem botão de simulação</div>
+        <div class="admin-controls-actions">
+          <button class="btn primary admin-refresh" id="refreshRtpBtn" type="button">Atualizar painel</button>
+          <div>
+            <div class="admin-readonly">● Monitoramento ao vivo · sem simulação</div>
+            <span class="admin-updated" id="adminLastUpdated" aria-live="polite">Última atualização: —</span>
+          </div>
+        </div>
       </div>
       <div class="rtp-live-note admin-live-note">RTP atual: <strong id="rtpValuePreview">80,00%</strong><span>·</span> Vantagem da casa: <strong id="houseEdgeValue">20,00%</strong><span>·</span><span id="rtpDataSource">Aguardando apostas do demo</span></div>
 
