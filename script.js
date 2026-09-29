@@ -39,6 +39,7 @@ function setActionButtons(disabled, label) {
 }
 
 const BET_HISTORY_KEY = 'avionix-demo-bet-history-v1';
+const LIVE_RTP_KEY = 'avionix-demo-live-rtp-v1';
 const AUTH_USER_KEY = 'avionix-demo-user-v2';
 const publicBets = [
   { user: 'Joao***', amount: 50, multiplier: 2.35, profit: 67.5, won: true, dot: 'dot-yellow' },
@@ -64,6 +65,14 @@ try {
 } catch {
   userBets = [];
 }
+let liveRtpBets = [];
+try {
+  const storedLiveBets = JSON.parse(localStorage.getItem(LIVE_RTP_KEY) || '[]');
+  liveRtpBets = Array.isArray(storedLiveBets) ? storedLiveBets : [];
+} catch {
+  liveRtpBets = [];
+}
+liveRtpBets = liveRtpBets.filter((bet) => bet.status !== 'pending');
 
 const STARTING_BALANCE = 500;
 const BALANCE_KEY = 'avionix-demo-balance-v3';
@@ -77,6 +86,7 @@ let multiplier = 1;
 let crashAt = 0;
 let animationTimer = null;
 let startedAt = 0;
+let currentLiveBetId = null;
 
 function brl(value) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
@@ -160,17 +170,27 @@ function renderBets() {
 }
 
 function recordUserBet(won, resolvedMultiplier, payout) {
-  userBets.unshift({
+  const recordedBet = {
+    id: currentLiveBetId || `${Date.now()}-${Math.random().toString(36).slice(2)}`,
     amount: currentBet,
     multiplier: resolvedMultiplier,
     payout,
     won,
     protected: roundProtection,
     timestamp: Date.now(),
-  });
+    status: 'settled',
+  };
+  userBets.unshift(recordedBet);
   userBets = userBets.slice(0, 20);
   localStorage.setItem(BET_HISTORY_KEY, JSON.stringify(userBets));
+  const pendingIndex = liveRtpBets.findIndex((bet) => bet.id === currentLiveBetId && bet.status === 'pending');
+  if (pendingIndex >= 0) liveRtpBets.splice(pendingIndex, 1, recordedBet);
+  else liveRtpBets.unshift(recordedBet);
+  liveRtpBets = liveRtpBets.slice(0, 1000);
+  localStorage.setItem(LIVE_RTP_KEY, JSON.stringify(liveRtpBets));
+  currentLiveBetId = null;
   renderBets();
+  renderLiveRtpBlock();
 }
 
 function syncBetPreview() {
@@ -181,6 +201,22 @@ function updateBalance() {
   balanceEl.textContent = brl(balance);
   if (balanceCardEl) balanceCardEl.textContent = brl(balance);
   localStorage.setItem(BALANCE_KEY, String(balance));
+}
+
+function beginLiveBet() {
+  currentLiveBetId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  liveRtpBets.unshift({
+    id: currentLiveBetId,
+    amount: currentBet,
+    multiplier: null,
+    payout: 0,
+    won: false,
+    timestamp: Date.now(),
+    status: 'pending',
+  });
+  liveRtpBets = liveRtpBets.slice(0, 1000);
+  localStorage.setItem(LIVE_RTP_KEY, JSON.stringify(liveRtpBets));
+  renderLiveRtpBlock();
 }
 
 function showToast(message) {
@@ -233,6 +269,7 @@ function simulateRtpBlock() {
   rtpBetCountInput.value = String(totalBets);
   rtpStakeInput.value = stake.toFixed(2).replace('.', ',');
   updateRtpPreview();
+  $('#rtpDataSource').textContent = 'Simulação estatística';
 
   const betsByMultiplier = distributeBets(totalBets, RTP_MULTIPLIERS.length);
   let totalPaid = 0;
@@ -286,6 +323,54 @@ function simulateRtpBlock() {
   $('#rtpLossChance').textContent = formatPercent(lossChance * 100);
 }
 
+function renderLiveRtpBlock() {
+  const rtpPercent = Math.min(100, Math.max(0, parseMoney(rtpInput.value)));
+  const rtp = rtpPercent / 100;
+  const allBets = liveRtpBets.filter((bet) => Number(bet.amount) > 0);
+  const settledBets = allBets.filter((bet) => bet.status !== 'pending' && Number(bet.multiplier) >= 1);
+  const pendingBets = allBets.filter((bet) => bet.status === 'pending');
+  const totalBet = allBets.reduce((sum, bet) => sum + Number(bet.amount), 0);
+  const totalPaid = settledBets.reduce((sum, bet) => sum + Number(bet.payout || 0), 0);
+  const observedHits = settledBets.filter((bet) => bet.won).length;
+  const expectedPaid = totalBet * rtp;
+  const expectedHouseResult = totalBet * (1 - rtp);
+  const expectedHits = settledBets.reduce((sum, bet) => sum + Math.min(1, rtp / Number(bet.multiplier)), 0);
+  const variance = settledBets.reduce((sum, bet) => {
+    const amount = Number(bet.amount);
+    const multiplierValue = Number(bet.multiplier);
+    const probability = Math.min(1, rtp / multiplierValue);
+    return sum + (amount * multiplierValue) ** 2 * probability * (1 - probability);
+  }, 0);
+  const standardDeviation = Math.sqrt(variance);
+  const p5 = expectedHouseResult - 1.64485362695147 * standardDeviation;
+  const p95 = expectedHouseResult + 1.64485362695147 * standardDeviation;
+  const lossChance = standardDeviation === 0
+    ? (expectedHouseResult < 0 ? 1 : 0)
+    : normalCdf(-expectedHouseResult / standardDeviation);
+  const houseResult = totalBet - totalPaid;
+
+  updateRtpPreview();
+  $('#rtpDataSource').textContent = allBets.length
+    ? `Apostas novas neste navegador: ${formatCount(allBets.length)}${pendingBets.length ? ` · ${formatCount(pendingBets.length)} em andamento` : ''}`
+    : 'Aguardando novas apostas do demo';
+  $('#rtpTotalBet').textContent = brl(totalBet);
+  $('#rtpTotalPaid').textContent = brl(totalPaid);
+  $('#rtpHouseResult').textContent = brl(houseResult);
+  $('#rtpHouseResult').className = houseResult >= 0 ? 'positive' : 'negative';
+  $('#rtpExpectedPaid').textContent = brl(expectedPaid);
+  $('#rtpObservedHits').textContent = formatCount(observedHits);
+  $('#rtpExpectedHits').textContent = formatCount(expectedHits);
+  $('#rtpStdDev').textContent = brl(standardDeviation);
+  $('#rtpRange').textContent = `${brl(p5)} – ${brl(p95)}`;
+  $('#rtpLossChance').textContent = formatPercent(lossChance * 100);
+
+  rtpRows.forEach((row) => {
+    row.querySelector('[data-rtp-bets]').textContent = '—';
+    row.querySelector('[data-rtp-observed]').textContent = '—';
+    row.querySelector('[data-rtp-expected]').textContent = '—';
+  });
+}
+
 function randomCrashPoint() {
   const r = Math.random();
   if (r < 0.45) return 1.05 + Math.random() * 0.8;
@@ -330,7 +415,7 @@ function setPlaneProgress(value) {
   const angle = Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x) * 180 / Math.PI;
   plane.style.left = `${point.x / 10}%`;
   plane.style.bottom = `${(1 - point.y / 520) * 100}%`;
-  plane.style.transform = `translate(-10%, 42%) rotate(${angle}deg) scale(${1 + progress * .32})`;
+  plane.style.transform = `translate(-50%, 45%) rotate(${angle}deg) scale(${.9 + progress * .28})`;
   flightCurve.style.opacity = running ? '1' : '0';
   flightFill.style.opacity = running ? '1' : '0';
   flightCurve.style.strokeDashoffset = String(1 - progress);
@@ -346,7 +431,7 @@ function resetStage() {
   plane.style.opacity = '1';
   plane.style.left = '3%';
   plane.style.bottom = '2%';
-  plane.style.transform = 'translate(-10%, 42%) rotate(-2deg)';
+  plane.style.transform = 'translate(-50%, 45%) rotate(-2deg)';
   flightCurve.style.opacity = '0';
   flightFill.style.opacity = '0';
   flightCurve.style.strokeDashoffset = '1';
@@ -465,6 +550,7 @@ function startRound() {
   roundProtection = lossProtectionInput.checked;
   balance -= bet;
   updateBalance();
+  beginLiveBet();
   currentBetEl.textContent = brl(currentBet);
   potentialReturnEl.textContent = brl(currentBet);
   cashoutValueEl.textContent = brl(currentBet);
@@ -661,15 +747,29 @@ setInterval(() => {
   addHistory(carouselSequence[carouselIndex], true);
   carouselIndex = (carouselIndex + 1) % carouselSequence.length;
 }, 2600);
-rtpInput.addEventListener('input', updateRtpPreview);
+rtpInput.addEventListener('input', () => {
+  updateRtpPreview();
+  if (liveRtpBets.length) renderLiveRtpBlock();
+});
 rtpBetCountInput.addEventListener('input', updateRtpPreview);
 rtpStakeInput.addEventListener('input', updateRtpPreview);
 rtpSimulateBtn.addEventListener('click', simulateRtpBlock);
+window.addEventListener('storage', (event) => {
+  if (event.key !== LIVE_RTP_KEY) return;
+  try {
+    const incoming = JSON.parse(event.newValue || '[]');
+    liveRtpBets = Array.isArray(incoming) ? incoming : [];
+  } catch {
+    liveRtpBets = [];
+  }
+  renderLiveRtpBlock();
+});
 renderBets();
 syncBetPreview();
 updateBalance();
 updateModeVisibility();
 resetStage();
 updateRtpPreview();
-simulateRtpBlock();
+if (liveRtpBets.length) renderLiveRtpBlock();
+else simulateRtpBlock();
 
