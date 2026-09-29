@@ -7,6 +7,7 @@ const betInput = $('#betAmount');
 const autoStopInput = $('#autoStop');
 const autoStopField = $('#autoStopField');
 const lossProtectionInput = $('#lossProtection');
+const protectionUsesEl = $('#protectionUses');
 const startBtn = $('#startBtn');
 const mobileStartBtn = $('#mobileStartBtn');
 const cashoutBtn = $('#cashoutBtn');
@@ -35,6 +36,8 @@ function setActionButtons(disabled, label) {
 const BET_HISTORY_KEY = 'avionix-demo-bet-history-v1';
 const LIVE_RTP_KEY = 'avionix-demo-live-rtp-v1';
 const AUTH_USER_KEY = 'avionix-demo-user-v2';
+const PROTECTION_USAGE_KEY = 'avionix-demo-protection-usage-v1';
+const PROTECTION_DAILY_LIMIT = 2;
 const publicBets = [
   { user: 'Joao***', amount: 50, multiplier: 2.35, profit: 67.5, won: true, dot: 'dot-yellow' },
   { user: 'Ana***', amount: 25, multiplier: 0, profit: -25, won: false, dot: 'dot-pink' },
@@ -100,6 +103,51 @@ function updateModeVisibility() {
   const automatic = gameMode === 'automatic';
   autoStopField.hidden = !automatic;
   autoStopInput.disabled = !automatic;
+}
+
+function protectionDateKey() {
+  const now = new Date();
+  return [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-');
+}
+
+function protectionStorageKey() {
+  try {
+    const account = JSON.parse(localStorage.getItem(AUTH_USER_KEY) || 'null');
+    return `${PROTECTION_USAGE_KEY}:${String(account?.email || 'guest').toLowerCase()}`;
+  } catch {
+    return `${PROTECTION_USAGE_KEY}:guest`;
+  }
+}
+
+function readProtectionUsage() {
+  const today = protectionDateKey();
+  try {
+    const saved = JSON.parse(localStorage.getItem(protectionStorageKey()) || 'null');
+    if (saved?.date === today) return { date: today, count: Math.max(0, Number(saved.count) || 0) };
+  } catch {
+    // Usa zero quando o registro local estiver inválido.
+  }
+  return { date: today, count: 0 };
+}
+
+function updateProtectionAvailability() {
+  const usage = readProtectionUsage();
+  const remaining = Math.max(0, PROTECTION_DAILY_LIMIT - usage.count);
+  if (protectionUsesEl) {
+    protectionUsesEl.textContent = remaining === 1
+      ? '1 utilização disponível hoje.'
+      : `${remaining} utilizações disponíveis hoje.`;
+  }
+  if (!running && remaining === 0) lossProtectionInput.checked = false;
+  lossProtectionInput.disabled = running || remaining === 0;
+}
+
+function consumeProtectionUse() {
+  const usage = readProtectionUsage();
+  if (usage.count >= PROTECTION_DAILY_LIMIT) return false;
+  localStorage.setItem(protectionStorageKey(), JSON.stringify({ date: usage.date, count: usage.count + 1 }));
+  updateProtectionAvailability();
+  return true;
 }
 
 function multiplierLabel(value) {
@@ -293,7 +341,7 @@ function endRound(won = false) {
   cancelAnimationFrame(animationTimer);
   setActionButtons(false, '🚀  APOSTAR');
   cashoutBtn.disabled = true;
-  lossProtectionInput.disabled = false;
+  updateProtectionAvailability();
   addHistory(won ? multiplier : crashAt, true);
 
   if (!won) {
@@ -338,7 +386,7 @@ function cashout(auto = false) {
   cashoutValueEl.textContent = brl(payout);
   setActionButtons(false, '🚀  APOSTAR');
   cashoutBtn.disabled = true;
-  lossProtectionInput.disabled = false;
+  updateProtectionAvailability();
   addHistory(multiplier, true);
   recordUserBet(true, multiplier, payout);
   flightCurve.style.opacity = '1';
@@ -393,8 +441,15 @@ function startRound() {
   if (bet > balance) return showToast('Saldo demo insuficiente.');
   if (gameMode === 'automatic' && autoStop < 1.01) return showToast('A retirada automática deve ser maior que 1,00x.');
 
+  const useProtection = lossProtectionInput.checked;
+  if (useProtection && !consumeProtectionUse()) {
+    lossProtectionInput.checked = false;
+    updateProtectionAvailability();
+    return showToast('Você já utilizou a proteção duas vezes hoje.');
+  }
+
   currentBet = bet;
-  roundProtection = lossProtectionInput.checked;
+  roundProtection = useProtection;
   balance -= bet;
   updateBalance();
   beginLiveBet();
@@ -409,7 +464,7 @@ function startRound() {
   multiplierEl.className = 'multiplier running';
   setActionButtons(true, 'AVIÃO EM VOO...');
   cashoutBtn.disabled = false;
-  lossProtectionInput.disabled = true;
+  updateProtectionAvailability();
   animate();
 }
 
@@ -570,6 +625,7 @@ $('#authForm').addEventListener('submit', (e) => {
     localStorage.removeItem(BET_HISTORY_KEY);
     isAuthenticated = false;
     updateBalance();
+    updateProtectionAvailability();
     renderBets();
     showToast('Conta criada. Entre para começar a apostar.');
     $('#authForm').reset();
@@ -579,6 +635,7 @@ $('#authForm').addEventListener('submit', (e) => {
 
   if (saved && saved.email === emailValue && saved.password === passwordValue) {
     isAuthenticated = true;
+    updateProtectionAvailability();
     showToast('Login demo realizado com sucesso.');
     closeModal();
   } else {
@@ -598,5 +655,6 @@ renderBets();
 syncBetPreview();
 updateBalance();
 updateModeVisibility();
+updateProtectionAvailability();
 resetStage();
 
