@@ -44,7 +44,7 @@ function startRoundCooldown() {
     const remaining = Math.max(0, roundCooldownUntil - performance.now());
     if (remaining === 0) {
       roundCooldownUntil = 0;
-      startRoundCooldown();
+      setActionButtons(false, '🚀  APOSTAR');
       return;
     }
     setActionButtons(true, 'AGUARDE ' + Math.ceil(remaining / 1000) + 's...');
