@@ -99,7 +99,24 @@
         <div class="game-stage" id="stage">
           <div class="stage-shade"></div>
           <div class="grid-lines" aria-hidden="true"></div>
-          <div class="flight-path" id="flightPath" aria-hidden="true"></div>
+          <svg class="flight-trajectory" viewBox="0 0 1000 520" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+              <linearGradient id="trajectoryLineGradient" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#ff4be9" />
+                <stop offset=".55" stop-color="#a349ff" />
+                <stop offset="1" stop-color="#68ddff" />
+              </linearGradient>
+              <linearGradient id="trajectoryFillGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#c842ff" stop-opacity=".42" />
+                <stop offset="1" stop-color="#3715a8" stop-opacity=".04" />
+              </linearGradient>
+              <clipPath id="trajectoryClip">
+                <rect id="trajectoryClipRect" x="0" y="0" width="0" height="520" />
+              </clipPath>
+            </defs>
+            <path class="trajectory-fill" id="flightFill" clip-path="url(#trajectoryClip)" d="M 30 485 C 230 482 430 455 610 345 C 760 253 845 165 940 88 L 940 520 L 30 520 Z" />
+            <path class="trajectory-line" id="flightCurve" pathLength="1" d="M 30 485 C 230 482 430 455 610 345 C 760 253 845 165 940 88" />
+          </svg>
           <img class="plane" id="plane" src="avionix-plane.png" alt="" aria-hidden="true" />
           <div class="multiplier-wrap">
             <div id="statusLabel" class="status-label">PRONTO PARA DECOLAR</div>
