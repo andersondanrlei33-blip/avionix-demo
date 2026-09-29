@@ -33,6 +33,27 @@ function setActionButtons(disabled, label) {
   });
 }
 
+let roundCooldownUntil = 0;
+let roundCooldownTimer = 0;
+
+function startRoundCooldown() {
+  clearTimeout(roundCooldownTimer);
+  roundCooldownUntil = performance.now() + 3000;
+
+  const updateCooldown = () => {
+    const remaining = Math.max(0, roundCooldownUntil - performance.now());
+    if (remaining === 0) {
+      roundCooldownUntil = 0;
+      startRoundCooldown();
+      return;
+    }
+    setActionButtons(true, 'AGUARDE ' + Math.ceil(remaining / 1000) + 's...');
+    roundCooldownTimer = setTimeout(updateCooldown, 200);
+  };
+
+  updateCooldown();
+}
+
 const BET_HISTORY_KEY = 'avionix-demo-bet-history-v1';
 const LIVE_RTP_KEY = 'avionix-demo-live-rtp-v1';
 const AUTH_USER_KEY = 'avionix-demo-user-v2';
@@ -341,7 +362,7 @@ function resetStage() {
 function endRound(won = false) {
   running = false;
   cancelAnimationFrame(animationTimer);
-  setActionButtons(false, '🚀  APOSTAR');
+  startRoundCooldown();
   cashoutBtn.disabled = true;
   updateProtectionAvailability();
   addHistory(won ? multiplier : crashAt, true);
@@ -386,7 +407,7 @@ function cashout(auto = false) {
   plane.classList.add('plane-won');
   potentialReturnEl.textContent = brl(payout);
   cashoutValueEl.textContent = brl(payout);
-  setActionButtons(false, '🚀  APOSTAR');
+  startRoundCooldown();
   cashoutBtn.disabled = true;
   updateProtectionAvailability();
   addHistory(multiplier, true);
@@ -432,6 +453,7 @@ function animate() {
 
 function startRound() {
   if (running) return;
+  if (roundCooldownUntil > performance.now()) return;
   if (!isAuthenticated) {
     showToast('Cadastre-se e entre na sua conta para apostar.');
     openModal('login');
