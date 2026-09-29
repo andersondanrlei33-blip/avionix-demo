@@ -248,6 +248,16 @@ function distributeBets(total, groups) {
   return Array.from({ length: groups }, (_, index) => base + (index < remainder ? 1 : 0));
 }
 
+function houseResultLabel(value) {
+  return value < 0 ? `-${brl(Math.abs(value))}` : brl(value);
+}
+
+function nearestRtpMultiplierIndex(value) {
+  return RTP_MULTIPLIERS.reduce((closest, candidate, index) => (
+    Math.abs(candidate - value) < Math.abs(RTP_MULTIPLIERS[closest] - value) ? index : closest
+  ), 0);
+}
+
 function updateRtpPreview() {
   const rtpPercent = Math.min(100, Math.max(0, parseMoney(rtpInput.value)));
   $('#rtpValuePreview').textContent = formatPercent(rtpPercent);
@@ -270,6 +280,7 @@ function simulateRtpBlock() {
   rtpStakeInput.value = stake.toFixed(2).replace('.', ',');
   updateRtpPreview();
   $('#rtpDataSource').textContent = 'Simulação estatística';
+  $('#rtpTableCaption').textContent = 'Probabilidades e acertos por multiplicador. O bloco é distribuído de forma equilibrada entre as faixas.';
 
   const betsByMultiplier = distributeBets(totalBets, RTP_MULTIPLIERS.length);
   let totalPaid = 0;
@@ -292,12 +303,18 @@ function simulateRtpBlock() {
     observedHits += observed;
     expectedHits += expected;
     variance += bets * (stake * multiplierValue) ** 2 * probability * (1 - probability);
+    const rowPaid = observed * stake * multiplierValue;
+    const rowHouseResult = bets * stake - rowPaid;
 
     row.querySelector('[data-rtp-prob]').textContent = formatPercent(probability * 100);
     row.querySelector('[data-rtp-payout]').textContent = brl(stake * multiplierValue);
     row.querySelector('[data-rtp-bets]').textContent = formatCount(bets);
+    row.querySelector('[data-rtp-paid]').textContent = brl(rowPaid);
+    row.querySelector('[data-rtp-house]').textContent = houseResultLabel(rowHouseResult);
     row.querySelector('[data-rtp-observed]').textContent = formatCount(observed);
     row.querySelector('[data-rtp-expected]').textContent = formatCount(expected);
+    row.classList.toggle('house-loss', rowHouseResult < 0);
+    row.classList.toggle('house-profit', rowHouseResult >= 0);
   });
 
   const totalBet = totalBets * stake;
@@ -353,6 +370,9 @@ function renderLiveRtpBlock() {
   $('#rtpDataSource').textContent = allBets.length
     ? `Apostas novas neste navegador: ${formatCount(allBets.length)}${pendingBets.length ? ` · ${formatCount(pendingBets.length)} em andamento` : ''}`
     : 'Aguardando novas apostas do demo';
+  $('#rtpTableCaption').textContent = settledBets.length
+    ? 'Apostas ao vivo agrupadas pelo multiplicador de referência mais próximo. Resultado negativo indica prejuízo da casa nessa faixa.'
+    : 'Aguardando apostas concluídas para detalhar pagamentos e resultado da casa.';
   $('#rtpTotalBet').textContent = brl(totalBet);
   $('#rtpTotalPaid').textContent = brl(totalPaid);
   $('#rtpHouseResult').textContent = brl(houseResult);
@@ -364,10 +384,32 @@ function renderLiveRtpBlock() {
   $('#rtpRange').textContent = `${brl(p5)} – ${brl(p95)}`;
   $('#rtpLossChance').textContent = formatPercent(lossChance * 100);
 
-  rtpRows.forEach((row) => {
-    row.querySelector('[data-rtp-bets]').textContent = '—';
-    row.querySelector('[data-rtp-observed]').textContent = '—';
-    row.querySelector('[data-rtp-expected]').textContent = '—';
+  const liveRows = RTP_MULTIPLIERS.map(() => ({ count: 0, wagered: 0, paid: 0, observed: 0, expected: 0 }));
+  settledBets.forEach((bet) => {
+    const multiplierValue = Number(bet.multiplier);
+    const bucket = liveRows[nearestRtpMultiplierIndex(multiplierValue)];
+    const probability = Math.min(1, rtp / multiplierValue);
+    bucket.count += 1;
+    bucket.wagered += Number(bet.amount);
+    bucket.paid += Number(bet.payout || 0);
+    bucket.observed += bet.won ? 1 : 0;
+    bucket.expected += probability;
+  });
+
+  rtpRows.forEach((row, index) => {
+    const multiplierValue = RTP_MULTIPLIERS[index];
+    const probability = Math.min(1, rtp / multiplierValue);
+    const bucket = liveRows[index];
+    const rowHouseResult = bucket.wagered - bucket.paid;
+    row.querySelector('[data-rtp-prob]').textContent = formatPercent(probability * 100);
+    row.querySelector('[data-rtp-payout]').textContent = brl(parseMoney(rtpStakeInput.value) * multiplierValue);
+    row.querySelector('[data-rtp-bets]').textContent = bucket.count ? formatCount(bucket.count) : '—';
+    row.querySelector('[data-rtp-paid]').textContent = bucket.count ? brl(bucket.paid) : '—';
+    row.querySelector('[data-rtp-house]').textContent = bucket.count ? houseResultLabel(rowHouseResult) : '—';
+    row.querySelector('[data-rtp-observed]').textContent = bucket.count ? formatCount(bucket.observed) : '—';
+    row.querySelector('[data-rtp-expected]').textContent = bucket.count ? formatCount(bucket.expected) : '—';
+    row.classList.toggle('house-loss', bucket.count > 0 && rowHouseResult < 0);
+    row.classList.toggle('house-profit', bucket.count > 0 && rowHouseResult >= 0);
   });
 }
 
