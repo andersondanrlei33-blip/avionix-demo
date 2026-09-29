@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <meta name="theme-color" content="#030817" />
+  <title>Painel interno · Avionix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="stars" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="Voltar ao Avionix">
+      <span class="brand-icon">🚀</span>
+      <span class="brand-name">AVION<span>IX</span></span>
+    </a>
+    <div class="admin-context">
+      <strong>Painel interno</strong>
+      <small>Monitoramento privado de resultados</small>
+    </div>
+    <a class="btn deposit" href="index.html">Voltar ao site</a>
+  </header>
+
+  <main class="admin-shell">
+    <section class="rtp-panel panel" aria-labelledby="rtpTitle">
+      <div class="rtp-heading">
+        <div>
+          <span class="rtp-kicker">ACESSO INTERNO · NOINDEX</span>
+          <h1 id="rtpTitle">Monitor de RTP</h1>
+          <p>Resultados das apostas registradas, sem simulação e sem alterar o resultado de nenhuma rodada.</p>
+        </div>
+        <div class="rtp-formula"><strong>P(acerto) = RTP ÷ multiplicador</strong><span>Prêmio bruto = aposta × multiplicador</span></div>
+      </div>
+
+      <div class="admin-rtp-controls">
+        <label class="rtp-field" for="adminRtpInput">RTP de referência (%)<input id="adminRtpInput" type="number" inputmode="decimal" min="0" max="100" step="0.1" value="80" /></label>
+        <div class="admin-readonly">● Monitoramento ao vivo · sem botão de simulação</div>
+      </div>
+      <div class="rtp-live-note admin-live-note">RTP atual: <strong id="rtpValuePreview">80,00%</strong><span>·</span> Vantagem da casa: <strong id="houseEdgeValue">20,00%</strong><span>·</span><span id="rtpDataSource">Aguardando apostas do demo</span></div>
+
+      <div class="rtp-summary-grid" aria-live="polite">
+        <article class="rtp-metric"><span>Total apostado</span><strong id="rtpTotalBet">R$ 0,00</strong><small>volume registrado</small></article>
+        <article class="rtp-metric"><span>Total devolvido</span><strong id="rtpTotalPaid">R$ 0,00</strong><small>prêmios pagos</small></article>
+        <article class="rtp-metric"><span>Resultado da casa</span><strong id="rtpHouseResult">R$ 0,00</strong><small>apostado − pago</small></article>
+        <article class="rtp-metric"><span>Prêmios esperados</span><strong id="rtpExpectedPaid">R$ 0,00</strong><small>RTP aplicado ao volume</small></article>
+        <article class="rtp-metric"><span>Acertos observados / esperados</span><strong><span id="rtpObservedHits">0</span> / <span id="rtpExpectedHits">0</span></strong><small>eventos independentes</small></article>
+        <article class="rtp-metric"><span>Desvio padrão</span><strong id="rtpStdDev">R$ 0,00</strong><small>do resultado da casa</small></article>
+        <article class="rtp-metric"><span>Faixa provável P5–P95</span><strong id="rtpRange">R$ 0,00 – R$ 0,00</strong><small>aproximação normal</small></article>
+        <article class="rtp-metric"><span>Chance de prejuízo</span><strong id="rtpLossChance">0,00%</strong><small>estimada para o volume</small></article>
+      </div>
+
+      <div class="rtp-table-wrap">
+        <table class="rtp-table">
+          <caption id="rtpTableCaption">Aguardando apostas concluídas para detalhar pagamentos e resultado da casa.</caption>
+          <thead><tr><th scope="col">Multiplicador</th><th scope="col">P(acerto)</th><th scope="col">Prêmio médio</th><th scope="col">Apostas</th><th scope="col">Total pago</th><th scope="col">Resultado da casa</th><th scope="col">Acertos obs.</th><th scope="col">Acertos esp.</th></tr></thead>
+          <tbody id="rtpRows">
+            <tr data-rtp-row data-multiplier="1.01"><th scope="row">1,01x</th><td data-rtp-prob>79,21%</td><td data-rtp-payout>—</td><td data-rtp-bets>—</td><td data-rtp-paid>—</td><td data-rtp-house>—</td><td data-rtp-observed>—</td><td data-rtp-expected>—</td></tr>
+            <tr data-rtp-row data-multiplier="1.5"><th scope="row">1,50x</th><td data-rtp-prob>53,33%</td><td data-rtp-payout>—</td><td data-rtp-bets>—</td><td data-rtp-paid>—</td><td data-rtp-house>—</td><td data-rtp-observed>—</td><td data-rtp-expected>—</td></tr>
+            <tr data-rtp-row data-multiplier="2"><th scope="row">2,00x</th><td data-rtp-prob>40,00%</td><td data-rtp-payout>—</td><td data-rtp-bets>—</td><td data-rtp-paid>—</td><td data-rtp-house>—</td><td data-rtp-observed>—</td><td data-rtp-expected>—</td></tr>
+            <tr data-rtp-row data-multiplier="3"><th scope="row">3,00x</th><td data-rtp-prob>26,67%</td><td data-rtp-payout>—</td><td data-rtp-bets>—</td><td data-rtp-paid>—</td><td data-rtp-house>—</td><td data-rtp-observed>—</td><td data-rtp-expected>—</td></tr>
+            <tr data-rtp-row data-multiplier="5"><th scope="row">5,00x</th><td data-rtp-prob>16,00%</td><td data-rtp-payout>—</td><td data-rtp-bets>—</td><td data-rtp-paid>—</td><td data-rtp-house>—</td><td data-rtp-observed>—</td><td data-rtp-expected>—</td></tr>
+            <tr data-rtp-row data-multiplier="10"><th scope="row">10,00x</th><td data-rtp-prob>8,00%</td><td data-rtp-payout>—</td><td data-rtp-bets>—</td><td data-rtp-paid>—</td><td data-rtp-house>—</td><td data-rtp-observed>—</td><td data-rtp-expected>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="rtp-disclaimer"><strong>Importante:</strong> RTP de 80% é uma expectativa estatística, não uma garantia de lucro em cada período. Cada aposta é independente; este painel somente lê os registros disponíveis e não decide quem ganha.</p>
+    </section>
+  </main>
+
+  <footer><span>Avionix · Painel interno</span><span>Monitoramento sem simulação</span></footer>
+  <script src="admin.js" defer></script>
+</body>
+</html>
+
