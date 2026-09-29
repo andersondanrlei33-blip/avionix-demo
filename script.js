@@ -795,7 +795,7 @@ rtpInput.addEventListener('input', () => {
 });
 rtpBetCountInput.addEventListener('input', updateRtpPreview);
 rtpStakeInput.addEventListener('input', updateRtpPreview);
-rtpSimulateBtn.addEventListener('click', simulateRtpBlock);
+rtpSimulateBtn?.addEventListener('click', simulateRtpBlock);
 window.addEventListener('storage', (event) => {
   if (event.key !== LIVE_RTP_KEY) return;
   try {
@@ -812,6 +812,5 @@ updateBalance();
 updateModeVisibility();
 resetStage();
 updateRtpPreview();
-if (liveRtpBets.length) renderLiveRtpBlock();
-else simulateRtpBlock();
+renderLiveRtpBlock();
 
