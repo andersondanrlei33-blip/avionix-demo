@@ -16,7 +16,9 @@ const currentBetEl = $('#currentBet');
 const potentialReturnEl = $('#potentialReturn');
 const cashoutValueEl = $('#cashoutValue');
 const plane = $('#plane');
-const flightPath = $('#flightPath');
+const flightCurve = $('#flightCurve');
+const flightFill = $('#flightFill');
+const trajectoryClipRect = $('#trajectoryClipRect');
 const historyEl = $('#history');
 const betPreviewEl = $('#betPreview');
 const betsList = $('#betsList');
@@ -322,12 +324,17 @@ function addHistory(value, animate = false) {
 
 function setPlaneProgress(value) {
   const progress = Math.min(1, Math.log(value) / Math.log(12));
-  plane.style.left = `${10 + progress * 66}%`;
-  plane.style.bottom = `${11 + progress * 56}%`;
-  plane.style.transform = `rotate(${-20 + progress * 11}deg) scale(${1 + progress * .32})`;
-  flightPath.style.opacity = running ? '1' : '0';
-  flightPath.style.width = `${20 + progress * 360}px`;
-  flightPath.style.transform = `rotate(${-32 + progress * 15}deg)`;
+  const pathLength = flightCurve.getTotalLength();
+  const point = flightCurve.getPointAtLength(pathLength * progress);
+  const nextPoint = flightCurve.getPointAtLength(Math.min(pathLength, pathLength * (progress + .015)));
+  const angle = Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x) * 180 / Math.PI;
+  plane.style.left = `${point.x / 10}%`;
+  plane.style.bottom = `${(1 - point.y / 520) * 100}%`;
+  plane.style.transform = `translate(-10%, 42%) rotate(${angle}deg) scale(${1 + progress * .32})`;
+  flightCurve.style.opacity = running ? '1' : '0';
+  flightFill.style.opacity = running ? '1' : '0';
+  flightCurve.style.strokeDashoffset = String(1 - progress);
+  trajectoryClipRect.setAttribute('width', String(point.x));
 }
 
 function resetStage() {
@@ -337,10 +344,13 @@ function resetStage() {
   statusLabel.textContent = 'PRONTO PARA DECOLAR';
   plane.classList.remove('plane-won', 'plane-leaving');
   plane.style.opacity = '1';
-  plane.style.left = '10%';
-  plane.style.bottom = '11%';
-  plane.style.transform = 'rotate(-20deg)';
-  flightPath.style.opacity = '0';
+  plane.style.left = '3%';
+  plane.style.bottom = '2%';
+  plane.style.transform = 'translate(-10%, 42%) rotate(-2deg)';
+  flightCurve.style.opacity = '0';
+  flightFill.style.opacity = '0';
+  flightCurve.style.strokeDashoffset = '1';
+  trajectoryClipRect.setAttribute('width', '0');
   currentBetEl.textContent = brl(0);
   potentialReturnEl.textContent = brl(0);
   cashoutValueEl.textContent = brl(0);
@@ -368,7 +378,8 @@ function endRound(won = false) {
     statusLabel.textContent = 'VOCÊ PERDEU';
     plane.classList.remove('plane-won');
     plane.classList.add('plane-leaving');
-    flightPath.style.opacity = '0';
+    flightCurve.style.opacity = '1';
+    flightFill.style.opacity = '1';
     showToast(refund > 0
       ? `Rodada encerrada. Proteção devolveu ${brl(refund)}.`
       : `Rodada encerrada em ${multiplierLabel(crashAt)}`);
@@ -398,7 +409,8 @@ function cashout(auto = false) {
   lossProtectionInput.disabled = false;
   addHistory(multiplier, true);
   recordUserBet(true, multiplier, payout);
-  flightPath.style.opacity = '0';
+  flightCurve.style.opacity = '1';
+  flightFill.style.opacity = '1';
   showToast(`Você recebeu ${brl(payout)} em créditos demo.`);
 
   setTimeout(() => {
