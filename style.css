@@ -182,6 +182,12 @@ button:disabled { cursor: not-allowed; }
 .rtp-table tbody td { color: #bdc9ea; }
 .rtp-table tbody td:nth-child(2) { color: #b98cff; font-weight: 800; }
 .rtp-table tbody td:nth-child(3) { color: #00dfa5; }
+.rtp-table tbody td[data-rtp-paid] { color: #f1f4ff; }
+.rtp-table tbody td[data-rtp-house] { color: #00dfa5; font-weight: 800; }
+.rtp-table tbody tr.house-profit { background: rgba(0, 226, 165, .035); }
+.rtp-table tbody tr.house-loss { background: rgba(255, 49, 92, .1); }
+.rtp-table tbody tr.house-loss th, .rtp-table tbody tr.house-loss td[data-rtp-house] { color: #ff5574; }
+.rtp-table tbody tr.house-loss td[data-rtp-paid] { color: #ffd1d9; }
 .rtp-disclaimer { margin: 17px 2px 0; padding: 13px 15px; border-left: 3px solid #8252ff; border-radius: 0 9px 9px 0; color: #aebce3; background: rgba(55, 37, 139, .19); font-size: 12px; line-height: 1.55; }
 .rtp-disclaimer strong { color: #f1eaff; }
 
