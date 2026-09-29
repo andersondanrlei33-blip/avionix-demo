@@ -307,6 +307,8 @@ function setPlaneProgress(value) {
   const pathLength = flightCurve.getTotalLength();
   const point = flightCurve.getPointAtLength(pathLength * progress);
   const nextPoint = flightCurve.getPointAtLength(Math.min(pathLength, pathLength * (progress + .015)));
+  const trailProgress = Math.max(0, progress - .055);
+  const trailPoint = flightCurve.getPointAtLength(pathLength * trailProgress);
   const angle = Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x) * 180 / Math.PI;
   plane.style.left = `${point.x / 10}%`;
   plane.style.bottom = `${(1 - point.y / 520) * 100}%`;
@@ -314,7 +316,7 @@ function setPlaneProgress(value) {
   flightCurve.style.opacity = running ? '1' : '0';
   flightFill.style.opacity = running ? '1' : '0';
   flightCurve.style.strokeDashoffset = String(1 - progress);
-  trajectoryClipRect.setAttribute('width', String(point.x));
+  trajectoryClipRect.setAttribute('width', String(trailPoint.x));
 }
 
 function resetStage() {
